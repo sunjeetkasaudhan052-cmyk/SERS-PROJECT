@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, session, flash, jsonify
 from config import init_db, mysql
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,7 +9,9 @@ app = Flask(__name__)
 init_db(app)
 
 # Secret Key
-app.secret_key = "sers123"
+import os
+
+app.secret_key = os.getenv("SECRET_KEY", "sers123")
 
 
 # =====================================
