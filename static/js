@@ -1,0 +1,5 @@
+data:[
+    {{ total_reports }},
+    {{ pending_reports }},
+    {{ resolved_reports }}
+]

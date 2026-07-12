@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Reports - SERS</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        body{
+            font-family:Arial,sans-serif;
+            background:#f4f4f4;
+            margin:0;
+            padding:20px;
+        }
+
+        .container{
+            width:95%;
+            margin:auto;
+            background:#fff;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0,0,0,0.2);
+        }
+
+        h2{
+            text-align:center;
+            color:#003366;
+            margin-bottom:20px;
+        }
+
+        form{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        input[type="text"]{
+            padding:8px;
+            width:250px;
+        }
+
+        button{
+            padding:8px 15px;
+            background:#003366;
+            color:white;
+            border:none;
+            cursor:pointer;
+            border-radius:5px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        table th,
+        table td{
+            border:1px solid #ddd;
+            padding:10px;
+            text-align:center;
+        }
+
+        table th{
+            background:#003366;
+            color:white;
+        }
+
+        tr:nth-child(even){
+            background:#f2f2f2;
+        }
+
+        .btn{
+            background:#28a745;
+            color:white;
+            padding:8px 12px;
+            text-decoration:none;
+            border-radius:5px;
+            display:inline-block;
+        }
+
+        .btn:hover{
+            background:#218838;
+        }
+
+        .delete-btn{
+            background:red;
+        }
+
+        .delete-btn:hover{
+            background:darkred;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📋 Admin Reports Management</h2>
+
+<form method="GET" action="/admin_reports">
+
+    <input type="text"
+           name="search"
+           placeholder="Search by Name">
+
+    <button type="submit">Search</button>
+
+</form>
+
+<table>
+
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Mobile</th>
+    <th>Emergency</th>
+    <th>Location</th>
+    <th>Description</th>
+    <th>Status</th>
+    <th>Date & Time</th>
+    <th>Action</th>
+</tr>
+
+{% for report in reports %}
+
+<tr>
+
+<td>{{ report[0] }}</td>
+<td>{{ report[1] }}</td>
+<td>{{ report[2] }}</td>
+<td>{{ report[3] }}</td>
+<td>{{ report[4] }}</td>
+<td>{{ report[5] }}</td>
+<td>{{ report[6] }}</td>
+
+<td>
+{% if report[7] %}
+{{ report[7].strftime('%d-%m-%Y %I:%M %p') }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>
+
+<a class="btn" href="/update_status/{{ report[0] }}">
+Mark Resolved
+</a>
+
+<br><br>
+
+<a class="btn delete-btn"
+href="/delete_report/{{ report[0] }}">
+Delete
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</body>
+</html>

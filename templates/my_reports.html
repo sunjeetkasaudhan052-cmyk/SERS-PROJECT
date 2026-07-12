@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Reports - SERS</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+
+    background:linear-gradient(135deg,#0d47a1,#42a5f5);
+    min-height:100vh;
+    padding:30px;
+
+}
+
+
+.box{
+
+    width:95%;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+
+}
+
+
+h2{
+
+    text-align:center;
+    color:#0d47a1;
+    margin-bottom:25px;
+
+}
+
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+
+th{
+
+    background:#0d47a1;
+    color:white;
+    padding:12px;
+
+}
+
+
+td{
+
+    padding:12px;
+    text-align:center;
+    border:1px solid #ddd;
+
+}
+
+
+tr:nth-child(even){
+
+    background:#f2f2f2;
+
+}
+
+
+tr:hover{
+
+    background:#e3f2fd;
+
+}
+
+
+.status{
+
+    padding:6px 12px;
+    border-radius:20px;
+    font-weight:bold;
+
+}
+
+
+@media(max-width:768px){
+
+.box{
+
+    overflow-x:auto;
+
+}
+
+table{
+
+    min-width:900px;
+
+}
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="box">
+
+
+<h2>📋 My Emergency Reports</h2>
+
+
+<table>
+
+
+<tr>
+
+<th>ID</th>
+<th>Name</th>
+<th>Mobile</th>
+<th>Emergency Type</th>
+<th>Location</th>
+<th>Description</th>
+<th>Status</th>
+<th>Date & Time</th>
+
+</tr>
+
+
+
+{% if reports %}
+
+
+{% for report in reports %}
+
+
+<tr>
+
+<td>{{ report[0] }}</td>
+
+<td>{{ report[1] }}</td>
+
+<td>{{ report[2] }}</td>
+
+<td>{{ report[3] }}</td>
+
+<td>{{ report[4] }}</td>
+
+<td>{{ report[5] }}</td>
+
+
+<td>
+
+{% if report[6] == "Resolved" %}
+
+<span style="color:green;font-weight:bold;">
+✅ Resolved
+</span>
+
+{% else %}
+
+<span style="color:orange;font-weight:bold;">
+⏳ Pending
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if report[7] %}
+
+{{ report[7].strftime('%d-%m-%Y %I:%M %p') }}
+
+{% else %}
+
+-
+
+{% endif %}
+
+</td>
+
+
+</tr>
+
+
+{% endfor %}
+
+
+{% else %}
+
+
+<tr>
+
+<td colspan="8">
+
+No Reports Found
+
+</td>
+
+</tr>
+
+
+{% endif %}
+
+
+
+</table>
+
+
+</div>
+
+
+</body>
+
+</html>

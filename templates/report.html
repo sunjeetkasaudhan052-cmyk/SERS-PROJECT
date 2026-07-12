@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Report Emergency - SERS</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="box">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <h2>🚨 Report Emergency</h2>
+
+    <form action="/report" method="POST">
+
+        <label>Full Name</label><br>
+
+        <input
+            type="text"
+            name="name"
+            value="{{ username }}"
+            placeholder="Full Name"
+            required>
+
+        <br><br>
+
+        <label>Mobile Number</label><br>
+
+        <input
+            type="text"
+            name="mobile"
+            placeholder="Enter Mobile Number"
+            required>
+
+        <br><br>
+
+        <label>Emergency Type</label><br>
+
+        <select name="emergency_type" required>
+            <option value="Fire">🔥 Fire</option>
+            <option value="Medical">🚑 Medical</option>
+            <option value="Police">🚓 Police</option>
+            <option value="Accident">🚗 Accident</option>
+        </select>
+        <br><br>
+
+<label>Priority</label><br>
+
+<select name="priority" required>
+    <option value="Low">🟢 Low</option>
+    <option value="Medium" selected>🟡 Medium</option>
+    <option value="High">🟠 High</option>
+    <option value="Critical">🔴 Critical</option>
+</select>
+
+<br><br>
+
+        <br><br>
+
+        <label>Location</label><br>
+
+        <input
+            type="text"
+            id="location"
+            name="location"
+            placeholder="Current Location"
+            required>
+
+        <br><br>
+
+        <button type="button" onclick="getLocation()">
+            📍 Get Current Location
+        </button>
+
+        <br><br>
+
+        <h3>Location Map</h3>
+
+        <iframe
+            id="map"
+            src="https://www.google.com/maps?q=India&output=embed"
+            width="100%"
+            height="300"
+            style="border:0;border-radius:10px;">
+        </iframe>
+
+        <br><br>
+
+        <label>Description</label><br>
+
+        <textarea
+            name="description"
+            rows="5"
+            placeholder="Describe the emergency..."
+            required></textarea>
+
+        <br><br>
+
+        <button type="submit">
+            🚨 Submit Report
+        </button>
+
+    </form>
+
+</div>
+
+<script>
+function getLocation(){
+
+    if(navigator.geolocation){
+
+        navigator.geolocation.getCurrentPosition(function(position){
+
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
+
+            document.getElementById("location").value = lat + "," + lon;
+
+            document.getElementById("map").src =
+            "https://www.google.com/maps?q=" + lat + "," + lon + "&output=embed";
+
+        });
+
+    }else{
+
+        alert("Geolocation is not supported.");
+
+    }
+}
+</script>
+
+</body>
+</html>
+/* ===========================
+   SERS Professional Report UI
+=========================== */
+
+body{
+    background:linear-gradient(135deg,#0f172a,#2563eb);
+    font-family:Arial,sans-serif;
+    margin:0;
+    padding:30px;
+}
+
+.box{
+    max-width:700px;
+    margin:auto;
+    background:#fff;
+    padding:35px;
+    border-radius:18px;
+    box-shadow:0 15px 35px rgba(0,0,0,.25);
+}
+
+h2{
+    text-align:center;
+    color:#1e3a8a;
+    margin-bottom:25px;
+    font-size:32px;
+}
+
+h3{
+    color:#1e3a8a;
+    margin-top:20px;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:8px;
+    color:#333;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:14px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    font-size:16px;
+    outline:none;
+    transition:.3s;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#2563eb;
+    box-shadow:0 0 8px rgba(37,99,235,.3);
+}
+
+textarea{
+    resize:none;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    background:#1d4ed8;
+    transform:translateY(-2px);
+}
+
+iframe{
+    border-radius:12px;
+    margin-top:10px;
+}
+
+.flash{
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.flash.success{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.flash.error{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+@media(max-width:768px){
+
+    body{
+        padding:15px;
+    }
+
+    .box{
+        padding:20px;
+    }
+
+    h2{
+        font-size:26px;
+    }
+
+}

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERS Dashboard</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+        }
+
+        body{
+            background:#eef3f8;
+        }
+
+        .header{
+            background:linear-gradient(135deg,#0d47a1,#1976d2);
+            color:white;
+            padding:25px;
+            text-align:center;
+            box-shadow:0 4px 12px rgba(0,0,0,.2);
+        }
+
+        .header h1{
+            font-size:32px;
+        }
+
+        .header h3{
+            margin-top:10px;
+            color:#ffeb3b;
+        }
+
+        #datetime{
+            margin-top:12px;
+            font-size:17px;
+            color:#ffffff;
+        }
+
+        /* Flash Messages */
+
+        .flash{
+            width:90%;
+            margin:20px auto;
+            padding:12px;
+            border-radius:8px;
+            text-align:center;
+            font-weight:bold;
+        }
+
+        .success{
+            background:#d4edda;
+            color:#155724;
+            border:1px solid #c3e6cb;
+        }
+
+        .danger{
+            background:#f8d7da;
+            color:#721c24;
+            border:1px solid #f5c6cb;
+        }
+
+        .warning{
+            background:#fff3cd;
+            color:#856404;
+            border:1px solid #ffeeba;
+        }
+
+        .info{
+            background:#d1ecf1;
+            color:#0c5460;
+            border:1px solid #bee5eb;
+        }
+
+        .cards{
+            display:flex;
+            justify-content:center;
+            flex-wrap:wrap;
+            gap:25px;
+            margin:35px;
+        }
+
+        .card{
+            width:240px;
+            background:white;
+            border-radius:12px;
+            padding:25px;
+            text-align:center;
+            box-shadow:0 8px 18px rgba(0,0,0,.15);
+            transition:.3s;
+        }
+
+        .card:hover{
+            transform:translateY(-8px);
+        }
+
+        .card h2{
+            color:#0d47a1;
+            margin-bottom:10px;
+        }
+
+        .card h1{
+            color:#e53935;
+            font-size:38px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <h1>🚑 Smart Emergency Response System</h1>
+
+    <h3>Welcome, {{ username }}</h3>
+
+    <div id="datetime"></div>
+
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category,message in messages %}
+<div class="flash {{ category }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="cards">
+
+    <div class="card">
+        <h2>📋 Total Reports</h2>
+        <h1>{{ total_reports }}</h1>
+    </div>
+
+    <div class="card">
+        <h2>⏳ Pending</h2>
+        <h1>{{ pending_reports }}</h1>
+    </div>
+
+    <div class="card">
+        <h2>✅ Resolved</h2>
+        <h1>{{ resolved_reports }}</h1>
+    </div>
+
+</div>
+<div class="btns">
+
+    <a href="/report" class="btn">🚨 Report Emergency</a>
+
+    <a href="/my_reports" class="btn">📄 My Reports</a>
+
+    <a href="/track_report" class="btn">📍 Track Report</a>
+
+    <a href="/analytics" class="btn">📊 Analytics</a>
+
+    <a href="/admin_reports" class="btn">👨‍💼 Admin Panel</a>
+
+    <a href="/users" class="btn">👥 Users</a>
+
+    <a href="/logout" class="btn logout">🚪 Logout</a>
+
+</div>
+
+<style>
+
+.btns{
+    width:90%;
+    margin:auto;
+    text-align:center;
+}
+
+.btn{
+    display:inline-block;
+    margin:10px;
+    padding:14px 22px;
+    text-decoration:none;
+    background:#1565c0;
+    color:white;
+    border-radius:8px;
+    font-weight:bold;
+    transition:.3s;
+    box-shadow:0 4px 10px rgba(0,0,0,.2);
+}
+
+.btn:hover{
+    background:#0d47a1;
+    transform:translateY(-3px);
+}
+
+.logout{
+    background:#d32f2f;
+}
+
+.logout:hover{
+    background:#b71c1c;
+}
+
+@media(max-width:768px){
+
+    .cards{
+        flex-direction:column;
+        align-items:center;
+    }
+
+    .btn{
+        width:90%;
+    }
+
+}
+
+</style>
+
+<script>
+
+function updateTime(){
+
+    let now=new Date();
+
+    document.getElementById("datetime").innerHTML=
+    now.toLocaleDateString()+" | "+now.toLocaleTimeString();
+
+}
+
+setInterval(updateTime,1000);
+
+updateTime();
+
+</script>
+<div class="recent-box">
+
+    <h2>📋 Recent Emergency Reports</h2>
+
+    <table>
+
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Emergency</th>
+            <th>Status</th>
+        </tr>
+
+        {% for report in recent_reports %}
+
+        <tr>
+
+            <td>{{ report[0] }}</td>
+
+            <td>{{ report[1] }}</td>
+
+            <td>{{ report[2] }}</td>
+
+            <td>
+
+                {% if report[3] == "Resolved" %}
+
+                    <span class="status resolved">
+                        ✅ Resolved
+                    </span>
+
+                {% else %}
+
+                    <span class="status pending">
+                        ⏳ Pending
+                    </span>
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+<style>
+
+.recent-box{
+
+    width:90%;
+    margin:40px auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+
+}
+
+.recent-box h2{
+
+    text-align:center;
+    color:#0d47a1;
+    margin-bottom:20px;
+
+}
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+table th{
+
+    background:#0d47a1;
+    color:white;
+    padding:14px;
+
+}
+
+table td{
+
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+
+}
+
+table tr:nth-child(even){
+
+    background:#f7f7f7;
+
+}
+
+table tr:hover{
+
+    background:#e3f2fd;
+
+}
+
+.status{
+
+    padding:6px 12px;
+    border-radius:20px;
+    font-weight:bold;
+
+}
+
+.pending{
+
+    background:#fff3cd;
+    color:#856404;
+
+}
+
+.resolved{
+
+    background:#d4edda;
+    color:#155724;
+
+}
+
+.footer{
+
+    margin-top:40px;
+    background:#0d47a1;
+    color:white;
+    text-align:center;
+    padding:20px;
+
+}
+
+.footer p{
+
+    margin:6px 0;
+
+}
+
+</style>
+
+<div class="footer">
+
+    <h3>🚑 Smart Emergency Response System</h3>
+
+    <p>Developed by Sunjeet Kumar</p>
+
+    <p>© 2026 All Rights Reserved</p>
+
+</div>
+
+</body>
+</html>

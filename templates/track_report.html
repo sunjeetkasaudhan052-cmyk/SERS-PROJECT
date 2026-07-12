@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Track Emergency Report</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:linear-gradient(135deg,#0f172a,#2563eb);
+}
+
+.container{
+    width:90%;
+    max-width:700px;
+    margin:50px auto;
+}
+
+.card{
+    background:#fff;
+    border-radius:15px;
+    padding:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
+}
+
+h2{
+    text-align:center;
+    color:#1e3a8a;
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border:none;
+    border-radius:8px;
+    background:#2563eb;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.result{
+    margin-top:30px;
+    background:#f8fafc;
+    border-left:6px solid #2563eb;
+    padding:20px;
+    border-radius:10px;
+}
+
+.result p{
+    margin:10px 0;
+    font-size:17px;
+}
+
+.pending{
+    color:#e67e22;
+    font-weight:bold;
+}
+
+.resolved{
+    color:green;
+    font-weight:bold;
+}
+
+.notfound{
+    margin-top:20px;
+    background:#ffe5e5;
+    color:red;
+    padding:15px;
+    border-radius:8px;
+    text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h2>📍 Track Emergency Report</h2>
+
+<form method="POST">
+
+<input
+type="text"
+name="report_id"
+placeholder="Enter Report ID (Example: SERS-2026-00006)"
+required>
+
+<button type="submit">
+🔍 Search Report
+</button>
+
+</form>
+
+{% if report %}
+
+<div class="result">
+
+<h3>🚨 Report Details</h3>
+
+<p><b>🆔 Report ID :</b> {{ report[9] }}</p>
+
+<p><b>👤 Name :</b> {{ report[1] }}</p>
+
+<p><b>📱 Mobile :</b> {{ report[2] }}</p>
+
+<p><b>🚑 Emergency :</b> {{ report[3] }}</p>
+
+<p><b>⚡ Priority :</b> {{ report[10] }}</p>
+
+<p><b>📍 Location :</b> {{ report[4] }}</p>
+
+<p><b>📝 Description :</b> {{ report[5] }}</p>
+
+<p>
+<b>📌 Status :</b>
+
+{% if report[6]=="Resolved" %}
+<span class="resolved">✅ Resolved</span>
+{% else %}
+<span class="pending">🟡 Pending</span>
+{% endif %}
+
+</p>
+
+<p><b>📅 Date :</b> {{ report[7] }}</p>
+
+</div>
+
+{% elif request.method=="POST" %}
+
+<div class="notfound">
+❌ Report Not Found
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</body>
+</html>
