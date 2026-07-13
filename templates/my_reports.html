@@ -2,14 +2,12 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>My Reports - SERS</title>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
 
 <style>
 
@@ -21,139 +19,110 @@
 }
 
 body{
-
     background:linear-gradient(135deg,#0d47a1,#42a5f5);
     min-height:100vh;
     padding:30px;
-
 }
-
 
 .box{
-
-    width:95%;
+    width:98%;
+    max-width:1400px;
     margin:auto;
-    background:white;
-    padding:30px;
+    background:#fff;
     border-radius:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.3);
-
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,.3);
+    overflow-x:auto;
 }
 
-
 h2{
-
     text-align:center;
     color:#0d47a1;
     margin-bottom:25px;
-
 }
-
 
 table{
-
     width:100%;
     border-collapse:collapse;
-
+    min-width:1200px;
 }
 
-
 th{
-
     background:#0d47a1;
     color:white;
     padding:12px;
-
+    border:1px solid #ddd;
 }
-
 
 td{
-
-    padding:12px;
-    text-align:center;
     border:1px solid #ddd;
-
+    padding:10px;
+    text-align:center;
+    vertical-align:middle;
+    word-break:break-word;
 }
-
 
 tr:nth-child(even){
-
-    background:#f2f2f2;
-
+    background:#f5f5f5;
 }
-
 
 tr:hover{
-
     background:#e3f2fd;
-
 }
 
-
-.status{
-
-    padding:6px 12px;
-    border-radius:20px;
+.pending{
+    color:#ff9800;
     font-weight:bold;
-
 }
 
-
-@media(max-width:768px){
-
-.box{
-
-    overflow-x:auto;
-
+.resolved{
+    color:green;
+    font-weight:bold;
 }
 
-table{
-
-    min-width:900px;
-
+.back-btn{
+    display:inline-block;
+    margin-top:25px;
+    padding:12px 30px;
+    background:#0d47a1;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
 }
 
+.back-btn:hover{
+    background:#1565c0;
 }
-
 
 </style>
 
-
 </head>
-
 
 <body>
 
-
 <div class="box">
-
 
 <h2>📋 My Emergency Reports</h2>
 
-
 <table>
 
-
 <tr>
-
 <th>ID</th>
+<th>Report ID</th>
 <th>Name</th>
 <th>Mobile</th>
 <th>Emergency Type</th>
+<th>Priority</th>
 <th>Location</th>
 <th>Description</th>
 <th>Status</th>
 <th>Date & Time</th>
-
 </tr>
-
-
 
 {% if reports %}
 
-
 {% for report in reports %}
-
 
 <tr>
 
@@ -169,53 +138,35 @@ table{
 
 <td>{{ report[5] }}</td>
 
+<td>{{ report[6] }}</td>
+
+<td>{{ report[7] }}</td>
 
 <td>
 
-{% if report[6] == "Resolved" %}
+{% if report[8] == "Resolved" %}
 
-<span style="color:green;font-weight:bold;">
-✅ Resolved
-</span>
+<span class="resolved">✅ Resolved</span>
 
 {% else %}
 
-<span style="color:orange;font-weight:bold;">
-⏳ Pending
-</span>
+<span class="pending">⏳ Pending</span>
 
 {% endif %}
 
 </td>
 
-
-<td>
-
-{% if report[7] %}
-
-{{ report[7].strftime('%d-%m-%Y %I:%M %p') }}
-
-{% else %}
-
--
-
-{% endif %}
-
-</td>
-
+<td>{{ report[9] }}</td>
 
 </tr>
 
-
 {% endfor %}
-
 
 {% else %}
 
-
 <tr>
 
-<td colspan="8">
+<td colspan="10">
 
 No Reports Found
 
@@ -223,16 +174,21 @@ No Reports Found
 
 </tr>
 
-
 {% endif %}
-
-
 
 </table>
 
+<div style="text-align:center;">
+
+<a href="/dashboard" class="back-btn">
+
+⬅ Back to Dashboard
+
+</a>
 
 </div>
 
+</div>
 
 </body>
 

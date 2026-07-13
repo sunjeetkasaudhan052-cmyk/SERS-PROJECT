@@ -1,17 +1,40 @@
 import os
+import pymysql
 from flask import Flask, render_template, request, redirect, session, flash, jsonify
-from config import init_db, mysql
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
+
+def get_connection():
+    return pymysql.connect(
+        host="gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+        port=4000,
+        user="otDZndFBCN8S6vm.root",
+        password="YAHA_APNA_NAYA_PASSWORD_DALO",
+        database="sys",
+        ssl_disabled=False,
+        autocommit=True
+    )
+
+
 app = Flask(__name__)
-
-# Initialize MySQL
-init_db(app)
-
-# Secret Key
-import os
-
 app.secret_key = os.getenv("SECRET_KEY", "sers123")
+
+
+# =====================================
+# TiDB MySQL Connection
+# =====================================
+def get_connection():
+    return pymysql.connect(
+        host="gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+        port=4000,
+        user="otDZndFBCN8S6vm.root",
+        password="28hKV4MIop0jIYVi",
+        database="test",
+        ssl={"ssl": {}},
+        autocommit=True,
+        cursorclass=pymysql.cursors.Cursor
+    )
 
 
 # =====================================
@@ -20,8 +43,6 @@ app.secret_key = os.getenv("SECRET_KEY", "sers123")
 @app.route("/")
 def home():
     return render_template("index.html")
-
-
 # =====================================
 # Register
 # =====================================
@@ -33,11 +54,13 @@ def register():
         name = request.form["name"]
         email = request.form["email"]
         password = request.form["password"]
+
         hashed_password = generate_password_hash(password)
 
-        cur = mysql.connection.cursor()
+        conn = get_connection()
+        cur = conn.cursor()
 
-        # Check Email
+        # Check if email already exists
         cur.execute(
             "SELECT * FROM users WHERE email=%s",
             (email,)
@@ -47,27 +70,30 @@ def register():
 
         if user:
             cur.close()
+            conn.close()
             flash("Email already registered!", "danger")
             return redirect("/register")
 
         # Insert User
         cur.execute(
-    """
-    INSERT INTO users(full_name,email,password)
-    VALUES(%s,%s,%s)
-    """,
-    (name, email, hashed_password)
-)
-        
+            """
+            INSERT INTO users(full_name,email,password)
+            VALUES(%s,%s,%s)
+            """,
+            (name, email, hashed_password)
+        )
 
-        mysql.connection.commit()
+        conn.commit()
         cur.close()
+        conn.close()
 
         flash("Registration Successful! Please Login.", "success")
         return redirect("/login")
 
     return render_template("register.html")
-## =====================================
+
+
+# =====================================
 # Login
 # =====================================
 @app.route("/login", methods=["GET", "POST"])
@@ -78,9 +104,9 @@ def login():
         email = request.form["email"]
         password = request.form["password"]
 
-        cur = mysql.connection.cursor()
+        conn = get_connection()
+        cur = conn.cursor()
 
-        # Get user by email
         cur.execute(
             "SELECT * FROM users WHERE email=%s",
             (email,)
@@ -89,6 +115,7 @@ def login():
         user = cur.fetchone()
 
         cur.close()
+        conn.close()
 
         if user and check_password_hash(user[3], password):
 
@@ -97,16 +124,24 @@ def login():
             session["email"] = user[2]
 
             flash("Login Successful!", "success")
-
             return redirect("/dashboard")
 
-        else:
-
-            flash("Invalid Email or Password!", "danger")
-
-            return redirect("/login")
+        flash("Invalid Email or Password!", "danger")
+        return redirect("/login")
 
     return render_template("login.html")
+
+
+# =====================================
+# Logout
+# =====================================
+@app.route("/logout")
+def logout():
+
+    session.clear()
+    flash("Logged Out Successfully!", "success")
+
+    return redirect("/login")
 # =====================================
 # Dashboard
 # =====================================
@@ -117,40 +152,44 @@ def dashboard():
         flash("Please Login First!", "warning")
         return redirect("/login")
 
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     # Total Reports
     cur.execute("SELECT COUNT(*) FROM reports")
     total_reports = cur.fetchone()[0]
 
     # Pending Reports
-    cur.execute("SELECT COUNT(*) FROM reports WHERE status='Pending'")
+    cur.execute("SELECT COUNT(*) FROM reports WHERE status=%s", ("Pending",))
     pending_reports = cur.fetchone()[0]
 
     # Resolved Reports
-    cur.execute("SELECT COUNT(*) FROM reports WHERE status='Resolved'")
+    cur.execute("SELECT COUNT(*) FROM reports WHERE status=%s", ("Resolved",))
     resolved_reports = cur.fetchone()[0]
 
     # Recent Reports
     cur.execute("""
-        SELECT id, full_name, emergency_type, status
+        SELECT report_id, full_name, emergency_type, status
         FROM reports
         ORDER BY id DESC
         LIMIT 5
     """)
-
     recent_reports = cur.fetchall()
 
     cur.close()
+    conn.close()
 
     return render_template(
         "dashboard.html",
+        username=session.get("user"),
         total_reports=total_reports,
         pending_reports=pending_reports,
         resolved_reports=resolved_reports,
-        username=session.get("user"),
-        recent_reports=recent_reports)
-  # =====================================
+        recent_reports=recent_reports
+    )
+
+
+# =====================================
 # Report Emergency
 # =====================================
 @app.route("/report", methods=["GET", "POST"])
@@ -169,21 +208,15 @@ def report():
         location = request.form["location"]
         description = request.form["description"]
 
-        cur = mysql.connection.cursor()
+        conn = get_connection()
+        cur = conn.cursor()
 
-        # Get Last Report ID
         cur.execute("SELECT id FROM reports ORDER BY id DESC LIMIT 1")
         last = cur.fetchone()
 
-        if last:
-            next_id = last[0] + 1
-        else:
-            next_id = 1
-
-        # Generate Report ID
+        next_id = last[0] + 1 if last else 1
         report_id = f"SERS-2026-{next_id:05d}"
 
-        # Insert Report
         cur.execute("""
             INSERT INTO reports
             (report_id, full_name, mobile, emergency_type,
@@ -200,8 +233,9 @@ def report():
             "Pending"
         ))
 
-        mysql.connection.commit()
+        conn.commit()
         cur.close()
+        conn.close()
 
         flash(f"Report Submitted Successfully! ID: {report_id}", "success")
         return redirect("/my_reports")
@@ -222,7 +256,8 @@ def my_reports():
         flash("Please Login First!", "warning")
         return redirect("/login")
 
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     cur.execute("""
         SELECT *
@@ -234,11 +269,12 @@ def my_reports():
     reports = cur.fetchall()
 
     cur.close()
+    conn.close()
 
     return render_template(
         "my_reports.html",
         reports=reports
-    ) 
+    )
 # =====================================
 # Track Report
 # =====================================
@@ -251,24 +287,26 @@ def track_report():
 
         report_id = request.form["report_id"]
 
-        cur = mysql.connection.cursor()
+        conn = get_connection()
+        cur = conn.cursor()
 
-        cur.execute(
-    """
-    SELECT * FROM reports
-    WHERE report_id = %s
-    """,
-    (report_id,)
-)
+        cur.execute("""
+            SELECT *
+            FROM reports
+            WHERE report_id=%s
+        """, (report_id,))
 
         report = cur.fetchone()
 
         cur.close()
+        conn.close()
 
     return render_template(
         "track_report.html",
         report=report
     )
+
+
 # =====================================
 # Analytics
 # =====================================
@@ -279,22 +317,26 @@ def analytics():
         flash("Please Login First!", "warning")
         return redirect("/login")
 
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     cur.execute("SELECT COUNT(*) FROM reports")
     total_reports = cur.fetchone()[0]
 
     cur.execute(
-        "SELECT COUNT(*) FROM reports WHERE status='Pending'"
+        "SELECT COUNT(*) FROM reports WHERE status=%s",
+        ("Pending",)
     )
     pending_reports = cur.fetchone()[0]
 
     cur.execute(
-        "SELECT COUNT(*) FROM reports WHERE status='Resolved'"
+        "SELECT COUNT(*) FROM reports WHERE status=%s",
+        ("Resolved",)
     )
     resolved_reports = cur.fetchone()[0]
 
     cur.close()
+    conn.close()
 
     return render_template(
         "analytics.html",
@@ -302,6 +344,8 @@ def analytics():
         pending_reports=pending_reports,
         resolved_reports=resolved_reports
     )
+
+
 # =====================================
 # Users List
 # =====================================
@@ -312,22 +356,24 @@ def users():
         flash("Please Login First!", "warning")
         return redirect("/login")
 
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     cur.execute("""
         SELECT id, full_name, email
         FROM users
+        ORDER BY id DESC
     """)
 
     users = cur.fetchall()
 
     cur.close()
+    conn.close()
 
     return render_template(
         "users.html",
         users=users
     )
-    
 # =====================================
 # Admin Reports
 # =====================================
@@ -340,21 +386,30 @@ def admin_reports():
 
     search = request.args.get("search")
 
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     if search:
         cur.execute(
-            "SELECT * FROM reports WHERE full_name LIKE %s",
+            """
+            SELECT *
+            FROM reports
+            WHERE full_name LIKE %s
+            ORDER BY id DESC
+            """,
             ("%" + search + "%",)
         )
     else:
-        cur.execute(
-            "SELECT * FROM reports ORDER BY id DESC"
-        )
+        cur.execute("""
+            SELECT *
+            FROM reports
+            ORDER BY id DESC
+        """)
 
     reports = cur.fetchall()
 
     cur.close()
+    conn.close()
 
     return render_template(
         "admin_reports.html",
@@ -372,16 +427,22 @@ def update_status(id):
         flash("Please Login First!", "warning")
         return redirect("/login")
 
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     cur.execute(
-        "UPDATE reports SET status='Resolved' WHERE id=%s",
-        (id,)
+        """
+        UPDATE reports
+        SET status=%s
+        WHERE id=%s
+        """,
+        ("Resolved", id)
     )
 
-    mysql.connection.commit()
+    conn.commit()
 
     cur.close()
+    conn.close()
 
     flash("Report Status Updated Successfully!", "success")
 
@@ -398,47 +459,25 @@ def delete_report(id):
         flash("Please Login First!", "warning")
         return redirect("/login")
 
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     cur.execute(
-        "DELETE FROM reports WHERE id=%s",
+        """
+        DELETE FROM reports
+        WHERE id=%s
+        """,
         (id,)
     )
 
-    mysql.connection.commit()
+    conn.commit()
 
     cur.close()
+    conn.close()
 
     flash("Report Deleted Successfully!", "success")
 
     return redirect("/admin_reports")
-
-
-# =====================================
-# =====================================
-# Logout
-# =====================================
-@app.route("/logout")
-def logout():
-
-    session.clear()
-
-    flash("Logged Out Successfully!", "success")
-
-    return redirect("/login")
-# =====================================
-# API Home
-# =====================================
-@app.route("/api")
-def api_home():
-
-    return jsonify({
-        "project": "Smart Emergency Response System",
-        "version": "1.0",
-        "status": "Running"
-    })
-
-
 # =====================================
 # Forgot Password
 # =====================================
@@ -450,13 +489,16 @@ def forgot_password():
         email = request.form["email"]
         password = request.form["password"]
 
-        # Password Hash
         hashed_password = generate_password_hash(password)
 
-        cur = mysql.connection.cursor()
+        conn = get_connection()
+        cur = conn.cursor()
 
-        # Check Email
-        cur.execute("SELECT * FROM users WHERE email=%s", (email,))
+        cur.execute(
+            "SELECT * FROM users WHERE email=%s",
+            (email,)
+        )
+
         user = cur.fetchone()
 
         if user:
@@ -466,32 +508,53 @@ def forgot_password():
                 (hashed_password, email)
             )
 
-            mysql.connection.commit()
+            conn.commit()
+
+            cur.close()
+            conn.close()
 
             flash("Password Updated Successfully!", "success")
-
-            cur.close()
-
             return redirect("/login")
 
-        else:
+        cur.close()
+        conn.close()
 
-            flash("Email Not Found!", "danger")
-
-            cur.close()
+        flash("Email Not Found!", "danger")
 
     return render_template("forgot_password.html")
+
+
 # =====================================
-# API - All Reports
+# API Home
+# =====================================
+@app.route("/api")
+def api_home():
+
+    return jsonify({
+        "project": "Smart Emergency Response System",
+        "version": "2.0",
+        "status": "Running"
+    })
+
+
+# =====================================
+# API Reports
 # =====================================
 @app.route("/api/reports")
 def api_reports():
 
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, report_id, full_name, emergency_type,
-               priority, location, status, created_at
+        SELECT id,
+               report_id,
+               full_name,
+               emergency_type,
+               priority,
+               location,
+               status,
+               created_at
         FROM reports
         ORDER BY id DESC
     """)
@@ -499,6 +562,7 @@ def api_reports():
     rows = cur.fetchall()
 
     cur.close()
+    conn.close()
 
     reports = []
 
