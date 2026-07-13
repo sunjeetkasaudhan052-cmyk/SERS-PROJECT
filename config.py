@@ -1,12 +1,13 @@
+import os
 import pymysql
 
 def get_connection():
     return pymysql.connect(
-        host="gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
-        port=4000,
-        user="otDZndFBCN8S6vm.root",
-        password="28hKV4MIop0jIYVi",
-        database="sys",
+        host=os.environ.get("DB_HOST"),
+        port=int(os.environ.get("DB_PORT")),
+        user=os.environ.get("DB_USER"),
+        password=os.environ.get("DB_PASSWORD"),
+        database=os.environ.get("DB_NAME"),
         ssl={"ssl": {}},
         cursorclass=pymysql.cursors.Cursor,
         autocommit=True
