@@ -108,7 +108,11 @@ def login():
         cur = conn.cursor()
 
         cur.execute(
-            "SELECT * FROM users WHERE email=%s",
+            """
+            SELECT id, full_name, email, password, role
+            FROM users
+            WHERE email=%s
+            """,
             (email,)
         )
 
@@ -119,9 +123,14 @@ def login():
 
         if user and check_password_hash(user[3], password):
 
+            print(user)
+
             session["user_id"] = user[0]
             session["user"] = user[1]
             session["email"] = user[2]
+            session["role"] = user[4]
+
+            print("ROLE =", session["role"])
 
             flash("Login Successful!", "success")
             return redirect("/dashboard")
@@ -130,8 +139,6 @@ def login():
         return redirect("/login")
 
     return render_template("login.html")
-
-
 # =====================================
 # Logout
 # =====================================
@@ -151,6 +158,8 @@ def dashboard():
     if "user" not in session:
         flash("Please Login First!", "warning")
         return redirect("/login")
+
+    print("ROLE =", session.get("role"))
 
     conn = get_connection()
     cur = conn.cursor()
@@ -182,6 +191,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         username=session.get("user"),
+        role=session.get("role"),
         total_reports=total_reports,
         pending_reports=pending_reports,
         resolved_reports=resolved_reports,
@@ -317,6 +327,10 @@ def analytics():
         flash("Please Login First!", "warning")
         return redirect("/login")
 
+    if session.get("role") != "admin":
+        flash("Access Denied!", "danger")
+        return redirect("/dashboard")
+
     conn = get_connection()
     cur = conn.cursor()
 
@@ -356,6 +370,9 @@ def users():
         flash("Please Login First!", "warning")
         return redirect("/login")
 
+    if session.get("role") != "admin":
+        flash("Access Denied!", "danger")
+        return redirect("/dashboard")
     conn = get_connection()
     cur = conn.cursor()
 
@@ -384,38 +401,41 @@ def admin_reports():
         flash("Please Login First!", "warning")
         return redirect("/login")
 
-    search = request.args.get("search")
+    if session.get("role") != "admin":
+        flash("Access Denied!", "danger")
+        return redirect("/dashboard")
 
-    conn = get_connection()
-    cur = conn.cursor()
+    # baaki code...
 
-    if search:
-        cur.execute(
-            """
-            SELECT *
-            FROM reports
-            WHERE full_name LIKE %s
-            ORDER BY id DESC
-            """,
-            ("%" + search + "%",)
-        )
-    else:
-        cur.execute("""
-            SELECT *
-            FROM reports
-            ORDER BY id DESC
-        """)
+    try:
+        search = request.args.get("search")
 
-    reports = cur.fetchall()
+        conn = get_connection()
+        cur = conn.cursor()
 
-    cur.close()
-    conn.close()
+        if search:
+            cur.execute("""
+                SELECT *
+                FROM reports
+                WHERE full_name LIKE %s
+                ORDER BY id DESC
+            """, ("%" + search + "%",))
+        else:
+            cur.execute("""
+                SELECT *
+                FROM reports
+                ORDER BY id DESC
+            """)
 
-    return render_template(
-        "admin_reports.html",
-        reports=reports
-    )
+        reports = cur.fetchall()
 
+        cur.close()
+        conn.close()
+
+        return render_template("admin_reports.html", reports=reports)
+
+    except Exception as e:
+        return str(e)
 
 # =====================================
 # Update Report Status
@@ -427,6 +447,9 @@ def update_status(id):
         flash("Please Login First!", "warning")
         return redirect("/login")
 
+    if session.get("role") != "admin":
+        flash("Access Denied!", "danger")
+        return redirect("/dashboard")
     conn = get_connection()
     cur = conn.cursor()
 
@@ -458,6 +481,10 @@ def delete_report(id):
     if "user" not in session:
         flash("Please Login First!", "warning")
         return redirect("/login")
+
+    if session.get("role") != "admin":
+        flash("Access Denied!", "danger")
+        return redirect("/dashboard")
 
     conn = get_connection()
     cur = conn.cursor()

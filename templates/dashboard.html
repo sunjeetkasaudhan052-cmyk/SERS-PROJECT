@@ -164,11 +164,15 @@
 
     <a href="/track_report" class="btn">📍 Track Report</a>
 
-    <a href="/analytics" class="btn">📊 Analytics</a>
+    {% if role == "admin" %}
 
-    <a href="/admin_reports" class="btn">👨‍💼 Admin Panel</a>
+<a href="/analytics" class="btn">📊 Analytics</a>
 
-    <a href="/users" class="btn">👥 Users</a>
+<a href="/admin_reports" class="btn">👨‍💼 Admin Panel</a>
+
+<a href="/users" class="btn">👥 Users</a>
+
+{% endif %}
 
     <a href="/logout" class="btn logout">🚪 Logout</a>
 
