@@ -138,11 +138,13 @@
 <td>{{ report[6] }}</td>
 
 <td>
-{% if report[7] %}
-{{ report[7] }}
-{% else %}
--
-{% endif %}
+<td>
+    {% if report[7] %}
+        {{ report[7][:19] }}
+    {% else %}
+        -
+    {% endif %}
+</td>
 </td>
 
 <td>
