@@ -1,118 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SERS Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
+<title>SERS Dashboard</title>
 
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:Arial,sans-serif;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        body{
-            background:#eef3f8;
-        }
+<style>
 
-        .header{
-            background:linear-gradient(135deg,#0d47a1,#1976d2);
-            color:white;
-            padding:25px;
-            text-align:center;
-            box-shadow:0 4px 12px rgba(0,0,0,.2);
-        }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
 
-        .header h1{
-            font-size:50px;
-        }
+body{
+background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
+min-height:100vh;
+color:white;
+}
 
-        .header h3{
-            margin-top:10px;
-            color:#ffeb3b;
-        }
+.header{
+width:95%;
+margin:20px auto;
+padding:30px;
+border-radius:20px;
+background:rgba(255,255,255,.12);
+backdrop-filter:blur(12px);
+box-shadow:0 10px 25px rgba(0,0,0,.35);
+text-align:center;
+}
 
-        #datetime{
-            margin-top:12px;
-            font-size:17px;
-            color:#ffffff;
-        }
+#header_heading{
+font-size:42px;
+font-weight:700;
+color:#4ade80;
+margin-bottom:10px;
+}
 
-        /* Flash Messages */
+.header h3{
+font-size:22px;
+margin-top:10px;
+}
 
-        .flash{
-            width:90%;
-            margin:20px auto;
-            padding:12px;
-            border-radius:8px;
-            text-align:center;
-            font-weight:bold;
-        }
+#datetime{
+margin-top:15px;
+font-size:18px;
+color:#dbeafe;
+}
 
-        .success{
-            background:#d4edda;
-            color:#155724;
-            border:1px solid #c3e6cb;
-        }
+.flash{
+width:90%;
+margin:20px auto;
+padding:14px;
+border-radius:10px;
+font-weight:600;
+text-align:center;
+}
 
-        .danger{
-            background:#f8d7da;
-            color:#721c24;
-            border:1px solid #f5c6cb;
-        }
+.success{
+background:#dcfce7;
+color:#166534;
+}
 
-        .warning{
-            background:#fff3cd;
-            color:#856404;
-            border:1px solid #ffeeba;
-        }
+.warning{
+background:#fef3c7;
+color:#92400e;
+}
 
-        .info{
-            background:#d1ecf1;
-            color:#0c5460;
-            border:1px solid #bee5eb;
-        }
+.danger{
+background:#fee2e2;
+color:#991b1b;
+}
 
-        .cards{
-            display:flex;
-            justify-content:center;
-            flex-wrap:wrap;
-            gap:25px;
-            margin:35px;
-        }
+.info{
+background:#dbeafe;
+color:#1d4ed8;
+}
 
-        .card{
-            width:240px;
-            background:white;
-            border-radius:12px;
-            padding:25px;
-            text-align:center;
-            box-shadow:0 8px 18px rgba(0,0,0,.15);
-            transition:.3s;
-        }
+.cards{
+width:95%;
+margin:35px auto;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:25px;
+}
 
-        .card:hover{
-            transform:translateY(-8px);
-        }
+.card{
+background:rgba(255,255,255,.96);
+color:#111827;
+padding:30px;
+border-radius:20px;
+text-align:center;
+box-shadow:0 12px 30px rgba(0,0,0,.30);
+transition:.4s;
+}
 
-        .card h2{
-            color:#0d47a1;
-            margin-bottom:10px;
-        }
+.card:hover{
+transform:translateY(-10px) scale(1.03);
+}
 
-        .card h1{
-            color:#e53935;
-            font-size:38px;
-        }
-        #header_heading{
-            color: #8dc015;
-            background: #000;
-        }
+.card h2{
+font-size:24px;
+margin-bottom:15px;
+color:#1d4ed8;
+}
 
-    </style>
+.card h1{
+font-size:42px;
+color:#dc2626;
+}
+
+</style>
 
 </head>
 
@@ -120,108 +123,324 @@
 
 <div class="header">
 
-    <h1 id="header_heading">🚑 Smart Emergency Response System</h1>
+<h1 id="header_heading">🚑 Smart Emergency Response System</h1>
 
-    <h3>Welcome, {{ username }}</h3>
+<h3>Welcome, {{ username }}</h3>
 
-    <div id="datetime"></div>
+<div id="datetime"></div>
 
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 {% for category,message in messages %}
+
 <div class="flash {{ category }}">
-    {{ message }}
+{{ message }}
 </div>
+
 {% endfor %}
 {% endif %}
 {% endwith %}
 
 <div class="cards">
 
-    <div class="card">
-        <h2>📋 Total Reports</h2>
-        <h1>{{ total_reports }}</h1>
-    </div>
+<div class="card">
+<h2>📋 Total Reports</h2>
+<h1>{{ total_reports }}</h1>
+</div>
 
-    <div class="card">
-        <h2>⏳ Pending</h2>
-        <h1>{{ pending_reports }}</h1>
-    </div>
+<div class="card">
+<h2>⏳ Pending</h2>
+<h1>{{ pending_reports }}</h1>
+</div>
 
-    <div class="card">
-        <h2>✅ Resolved</h2>
-        <h1>{{ resolved_reports }}</h1>
-    </div>
+<div class="card">
+<h2>✅ Resolved</h2>
+<h1>{{ resolved_reports }}</h1>
+</div>
 
 </div>
 <div class="btns">
 
-    <a href="/report" class="btn">🚨 Report Emergency</a>
+<a href="/report" class="btn report-btn">🚨 Report Emergency</a>
 
-    <a href="/my_reports" class="btn">📄 My Reports</a>
+<a href="/my_reports" class="btn my-btn">📄 My Reports</a>
 
-    <a href="/track_report" class="btn">📍 Track Report</a>
+<a href="/track_report" class="btn track-btn">📍 Track Report</a>
 
-    {% if role == "admin" %}
+{% if role == "admin" %}
 
-<a href="/analytics" class="btn">📊 Analytics</a>
+<a href="/analytics" class="btn analytics-btn">📊 Analytics</a>
 
-<a href="/admin_reports" class="btn">👨‍💼 Admin Panel</a>
+<a href="/admin_reports" class="btn admin-btn">👨‍💼 Admin Panel</a>
 
-<a href="/users" class="btn">👥 Users</a>
+<a href="/users" class="btn users-btn">👥 Users</a>
 
 {% endif %}
 
-    <a href="/logout" class="btn logout">🚪 Logout</a>
+<a href="/logout" class="btn logout-btn">🚪 Logout</a>
 
 </div>
 
 <style>
 
 .btns{
-    width:90%;
-    margin:auto;
-    text-align:center;
+width:95%;
+margin:25px auto;
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:15px;
 }
 
 .btn{
-    display:inline-block;
-    margin:10px;
-    padding:14px 22px;
-    text-decoration:none;
-    background:#1565c0;
-    color:white;
-    border-radius:8px;
-    font-weight:bold;
-    transition:.3s;
-    box-shadow:0 4px 10px rgba(0,0,0,.2);
+padding:15px 25px;
+border-radius:12px;
+text-decoration:none;
+font-size:16px;
+font-weight:600;
+color:white;
+transition:.35s;
+box-shadow:0 8px 18px rgba(0,0,0,.25);
 }
 
 .btn:hover{
-    background:#0d47a1;
-    transform:translateY(-3px);
+transform:translateY(-5px);
+box-shadow:0 15px 30px rgba(0,0,0,.35);
 }
 
-.logout{
-    background:#d32f2f;
+.report-btn{
+background:linear-gradient(135deg,#ef4444,#dc2626);
 }
 
-.logout:hover{
-    background:#b71c1c;
+.my-btn{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
 }
 
-@media(max-width:768px){
+.track-btn{
+background:linear-gradient(135deg,#14b8a6,#0f766e);
+}
 
-    .cards{
-        flex-direction:column;
-        align-items:center;
-    }
+.analytics-btn{
+background:linear-gradient(135deg,#8b5cf6,#6d28d9);
+}
 
-    .btn{
-        width:90%;
-    }
+.admin-btn{
+background:linear-gradient(135deg,#f59e0b,#d97706);
+}
+
+.users-btn{
+background:linear-gradient(135deg,#06b6d4,#0891b2);
+}
+
+.logout-btn{
+background:linear-gradient(135deg,#111827,#374151);
+}
+
+.recent-box{
+
+width:95%;
+margin:40px auto;
+background:rgba(255,255,255,.96);
+padding:25px;
+border-radius:20px;
+box-shadow:0 12px 25px rgba(0,0,0,.30);
+
+}
+
+.recent-box h2{
+
+text-align:center;
+color:#1d4ed8;
+margin-bottom:20px;
+
+}
+
+table{
+
+width:100%;
+border-collapse:collapse;
+overflow:hidden;
+
+}
+
+table th{
+
+background:#1d4ed8;
+color:white;
+padding:15px;
+font-size:16px;
+
+}
+
+table td{
+
+padding:14px;
+text-align:center;
+color:#111827;
+border-bottom:1px solid #e5e7eb;
+
+}
+
+table tr:nth-child(even){
+
+background:#f3f4f6;
+
+}
+
+table tr:hover{
+
+background:#dbeafe;
+transition:.3s;
+
+}
+
+.status{
+
+padding:7px 14px;
+border-radius:20px;
+font-weight:600;
+
+}
+
+.pending{
+
+background:#fef3c7;
+color:#92400e;
+
+}
+
+.resolved{
+
+background:#dcfce7;
+color:#166534;
+
+}
+
+</style>
+
+<div class="recent-box">
+
+<h2>📋 Recent Emergency Reports</h2>
+
+<table>
+
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Emergency</th>
+<th>Status</th>
+</tr>
+
+{% for report in recent_reports %}
+
+<tr>
+
+<td>{{ report[0] }}</td>
+
+<td>{{ report[1] }}</td>
+
+<td>{{ report[2] }}</td>
+
+<td>
+
+{% if report[3]=="Resolved" %}
+
+<span class="status resolved">✅ Resolved</span>
+
+{% else %}
+
+<span class="status pending">⏳ Pending</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+</table>
+
+</div>
+
+<!-- ⭐ PART 3 YAHAN SE START HOGA -->
+
+<div class="analytics-box">
+
+    <h2>📊 Dashboard Analytics</h2>
+
+    <div class="charts">
+
+        <div class="chart-card">
+            <h3>Emergency Status</h3>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>Reports Overview</h3>
+            <canvas id="reportChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ⭐ PART 3 YAHAN KHATAM HOGA -->
+
+<div class="footer">
+
+    <h3>🚑 Smart Emergency Response System</h3>
+
+    <p>Developed by Sunjeet Kumar</p>
+
+    <p>© 2026 All Rights Reserved</p>
+
+</div>
+
+</body>
+</html>
+<!-- ===================== FOOTER ===================== -->
+
+<div class="footer">
+
+    <h2>🚑 Smart Emergency Response System</h2>
+
+    <p>Developed by <b>Sunjeet Kumar</b></p>
+
+    <p>© 2026 All Rights Reserved</p>
+
+</div>
+
+<style>
+
+.footer{
+
+    width:100%;
+    margin-top:50px;
+    padding:30px;
+    text-align:center;
+    background:rgba(0,0,0,.25);
+    backdrop-filter:blur(10px);
+    color:white;
+
+}
+
+.footer h2{
+
+    color:#4ade80;
+    margin-bottom:10px;
+
+}
+
+.footer p{
+
+    margin-top:8px;
+    color:#e5e7eb;
 
 }
 
@@ -242,161 +461,41 @@ setInterval(updateTime,1000);
 
 updateTime();
 
+
+// Card Counter Animation
+
+let counters=document.querySelectorAll(".card h1");
+
+counters.forEach(counter=>{
+
+let target=parseInt(counter.innerText);
+
+let count=0;
+
+let speed=Math.max(1,Math.ceil(target/50));
+
+let interval=setInterval(()=>{
+
+count+=speed;
+
+if(count>=target){
+
+counter.innerText=target;
+
+clearInterval(interval);
+
+}else{
+
+counter.innerText=count;
+
+}
+
+},20);
+
+});
+
 </script>
-<div class="recent-box">
-
-    <h2>📋 Recent Emergency Reports</h2>
-
-    <table>
-
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Emergency</th>
-            <th>Status</th>
-        </tr>
-
-        {% for report in recent_reports %}
-
-        <tr>
-
-            <td>{{ report[0] }}</td>
-
-            <td>{{ report[1] }}</td>
-
-            <td>{{ report[2] }}</td>
-
-            <td>
-
-                {% if report[3] == "Resolved" %}
-
-                    <span class="status resolved">
-                        ✅ Resolved
-                    </span>
-
-                {% else %}
-
-                    <span class="status pending">
-                        ⏳ Pending
-                    </span>
-
-                {% endif %}
-
-            </td>
-
-        </tr>
-
-        {% endfor %}
-
-    </table>
-
-</div>
-
-<style>
-
-.recent-box{
-
-    width:90%;
-    margin:40px auto;
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 8px 20px rgba(0,0,0,.15);
-
-}
-
-.recent-box h2{
-
-    text-align:center;
-    color:#0d47a1;
-    margin-bottom:20px;
-
-}
-
-table{
-
-    width:100%;
-    border-collapse:collapse;
-
-}
-
-table th{
-
-    background:#0d47a1;
-    color:white;
-    padding:14px;
-
-}
-
-table td{
-
-    padding:12px;
-    text-align:center;
-    border-bottom:1px solid #ddd;
-
-}
-
-table tr:nth-child(even){
-
-    background:#f7f7f7;
-
-}
-
-table tr:hover{
-
-    background:#e3f2fd;
-
-}
-
-.status{
-
-    padding:6px 12px;
-    border-radius:20px;
-    font-weight:bold;
-
-}
-
-.pending{
-
-    background:#fff3cd;
-    color:#856404;
-
-}
-
-.resolved{
-
-    background:#d4edda;
-    color:#155724;
-
-}
-
-.footer{
-
-    margin-top:40px;
-    background:#0d47a1;
-    color:white;
-    text-align:center;
-    padding:20px;
-
-}
-
-.footer p{
-
-    margin:6px 0;
-
-}
-
-</style>
-
-<div class="footer">
-
-    <h3>🚑 Smart Emergency Response System</h3>
-
-    <p>Developed by Sunjeet Kumar</p>
-
-    <p>© 2026 All Rights Reserved</p>
-
-</div>
 
 </body>
+
 </html>
